@@ -129,7 +129,12 @@ module Blather
       @receiver = @client = client
 
       self.jid = jid
-      @to = self.jid.domain
+      
+      if client.respond_to? :service_name
+        @to = client.service_name
+      else
+        @to = self.jid.domain
+      end
       @password = pass
     end
 
@@ -167,8 +172,12 @@ module Blather
 
 #      @keepalive.cancel
       @state = :stopped
-      @client.receive_data @error if @error
-      @client.unbind
+      
+      if @client.respond_to? :unbind_error and @error
+         @client.unbind_error(@error)
+      else
+         @client.unbind 
+      end
     end
 
     # Called by the parser with parsed nodes

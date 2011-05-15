@@ -35,6 +35,9 @@ module Blather
     attr_reader :jid,
                 :roster,
                 :caps
+                :roster
+                
+    attr_accessor :service_name
 
     # Create a new client and set it up
     #
@@ -58,6 +61,8 @@ module Blather
       @filters = {:before => [], :after => []}
       @roster = Roster.new self
       @caps = Stanza::Capabilities.new
+      
+      self.service_name = JID.new(jid).domain
 
       setup_initial_handlers
     end
@@ -174,9 +179,12 @@ module Blather
       self.jid.node ? client_post_init : ready!
     end
 
-    # @private
-    def unbind
-      call_handler_for(:disconnected, nil) || (EM.reactor_running? && EM.stop)
+    def unbind_error(error)
+       call_handler_for(:disconnected, error)  || (EM.reactor_running? && EM.stop)
+    end
+
+    def unbind  # @private
+        unbind_error(nil)
     end
 
     # @private
