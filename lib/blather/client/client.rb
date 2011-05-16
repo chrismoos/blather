@@ -37,6 +37,9 @@ module Blather
                 :caps
                 :roster
                 
+    # The value to use for the 'to' attribute in the <code><stream/></code> element.
+    # Defaults to the JID's domain.
+    # @return [String]
     attr_accessor :service_name
 
     # Create a new client and set it up

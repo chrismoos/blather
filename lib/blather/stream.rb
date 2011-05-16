@@ -21,6 +21,10 @@ module Blather
   #   Called when the stream is shutdown. This will be called regardless of which
   #   side shut the stream down.
   #
+  # * #unbind_error
+  #   Called when the stream is shutdown due to an error. The error will be passed into
+  #   the method.
+  #
   # @example Create a new stream and handle it with our own class
   #     class MyClient
   #       attr :jid
@@ -38,6 +42,10 @@ module Blather
   #
   #       def unbind
   #         p "Stream Ended"
+  #       end
+  #
+  #       def unbind_error(error)
+  #         p "Stream Ended: #{error}"
   #       end
   #
   #       def write(what)

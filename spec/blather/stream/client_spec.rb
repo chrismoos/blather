@@ -212,7 +212,7 @@ describe Blather::Stream::Client do
 
   it 'sends client an error on stream:error' do
     @client = mock()
-    @client.expects(:receive_data).with do |v|
+    @client.expects(:unbind_error).with do |v|
       v.name.must_equal :conflict
       v.text.must_equal 'Already signed in'
       v.to_s.must_equal "Stream Error (conflict): #{v.text}"
@@ -297,7 +297,7 @@ describe Blather::Stream::Client do
   it 'will fail if TLS negotiation fails' do
     state = nil
     @client = mock()
-    @client.expects(:receive_data).with { |v| v.must_be_kind_of Blather::Stream::TLS::TLSFailure }
+    @client.expects(:unbind_error).with { |v| v.must_be_kind_of Blather::Stream::TLS::TLSFailure }
     mocked_server(3) do |val, server|
       case state
       when nil
@@ -326,7 +326,7 @@ describe Blather::Stream::Client do
   it 'will fail if a bad node comes through TLS negotiations' do
     state = nil
     @client = mock()
-    @client.expects(:receive_data).with do |v|
+    @client.expects(:unbind_error).with do |v|
       v.must_be_kind_of Blather::Stream::TLS::TLSFailure
     end
     mocked_server(3) do |val, server|
@@ -482,7 +482,7 @@ describe Blather::Stream::Client do
     state = nil
     @jid = Blather::JID.new '@d'
     @client = mock()
-    @client.expects(:receive_data).with { |s| s.must_be_instance_of Blather::BlatherError }
+    @client.expects(:unbind_error).with { |s| s.must_be_instance_of Blather::BlatherError }
 
     mocked_server(2) do |val, server|
       case state
@@ -507,7 +507,7 @@ describe Blather::Stream::Client do
   it 'tries each possible mechanism until it fails completely' do
     state = nil
     @client = mock()
-    @client.expects(:receive_data).with do |n|
+    @client.expects(:unbind_error).with do |n|
       n.must_be_kind_of(Blather::SASLError)
       n.name.must_equal :not_authorized
     end
@@ -636,7 +636,7 @@ describe Blather::Stream::Client do
   ].each do |error_type|
     it "fails on #{error_type}" do
       @client = mock()
-      @client.expects(:receive_data).with do |n|
+      @client.expects(:unbind_error).with do |n|
         n.name.must_equal error_type.gsub('-','_').to_sym
       end
       state = nil
@@ -668,7 +668,7 @@ describe Blather::Stream::Client do
 
   it 'fails when an unknown node comes through during SASL negotiation' do
     @client = mock()
-    @client.expects(:receive_data).with do |n|
+    @client.expects(:unbind_error).with do |n|
       n.must_be_instance_of Blather::UnknownResponse
       n.node.element_name.must_equal 'foo-bar'
     end
@@ -780,7 +780,7 @@ describe Blather::Stream::Client do
       when :started
         state = :complete
         val =~ %r{<iq[^>]+id="([^"]+)"}
-        @client.expects(:receive_data).with("BIND result ID mismatch. Expected: #{$1}. Received: #{$1}-bad")
+        @client.expects(:unbind_error).with("BIND result ID mismatch. Expected: #{$1}. Received: #{$1}-bad")
         server.send_data "<iq type='result' id='#{$1}-bad'><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'><jid>#{@jid}/server_resource</jid></bind></iq>"
         val.must_match(%r{<bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"\s?/>})
 
@@ -799,7 +799,7 @@ describe Blather::Stream::Client do
   it 'will return an error if resource binding errors out' do
     state = nil
     @client = mock()
-    @client.expects(:receive_data).with do |n|
+    @client.expects(:unbind_error).with do |n|
       n.name.must_equal :bad_request
     end
     mocked_server(3) do |val, server|
@@ -830,7 +830,7 @@ describe Blather::Stream::Client do
   it 'will return an error if an unknown node comes through during resouce binding' do
     state = nil
     @client = mock()
-    @client.expects(:receive_data).with do |n|
+    @client.expects(:unbind_error).with do |n|
       n.must_be_instance_of Blather::UnknownResponse
       n.node.element_name.must_equal 'foo-bar'
     end
@@ -895,7 +895,7 @@ describe Blather::Stream::Client do
   it 'will return an error if session establishment errors out' do
     state = nil
     @client = mock()
-    @client.expects(:receive_data).with do |n|
+    @client.expects(:unbind_error).with do |n|
       n.name.must_equal :internal_server_error
     end
     mocked_server(3) do |val, server|
@@ -927,7 +927,7 @@ describe Blather::Stream::Client do
   it 'will return an error if an unknown node come through during session establishment' do
     state = nil
     @client = mock()
-    @client.expects(:receive_data).with do |n|
+    @client.expects(:unbind_error).with do |n|
       n.must_be_instance_of Blather::UnknownResponse
       n.node.element_name.must_equal 'foo-bar'
     end
@@ -959,7 +959,7 @@ describe Blather::Stream::Client do
 
   it 'sends client an error and reply to the server on parse error' do
     @client = mock()
-    @client.expects(:receive_data).with do |v|
+    @client.expects(:unbind_error).with do |v|
       v.must_be_kind_of Blather::ParseError
       v.message.must_match(/generate\-parse\-error/)
     end
